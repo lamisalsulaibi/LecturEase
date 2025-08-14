@@ -18,18 +18,25 @@ export async function POST(request: NextRequest) {
     }
 
     const prompt = `Please analyze the following transcript and provide:
-1. A concise summary (2-3 sentences)
-2. 3-5 key points as bullet points
-3. Fix grammar and fill missing words in this raw transcript.
 
+1) First, correct the raw transcript internally:
+   - Fix grammar, punctuation, spelling, and fill obvious missing words to make the transcript readable while preserving original meaning and speaker voice.
+   - Mark any uncertain or inferred insertions with square brackets, e.g. "[probably]".
+   - Do NOT include the corrected transcript in the final output; use the corrected transcript only to produce the summary and key points.
+   - Do not invent facts or add new claims not implied by the original text.
 
-Transcript: "${text}"
+2) Then, produce:
+   a. A full, thorough summary (no length limit) that captures every meaningful idea, context, nuance, and relevant inference. If you make any high-level inferences (tone, intent, context), label them explicitly as an inference.
+   b. Key points as an array containing as many items as needed to cover all significant details from the transcript (no fixed number).
 
-Please format your response as JSON with the following structure:
+Output MUST be valid JSON only (no extra text) and MUST follow this exact structure — do not add, remove, or rename fields:
+
 {
-  "summary": "your summary here",
-  "keyPoints": ["point 1", "point 2", "point 3"],
-}`
+  "summary": "your full, unlimited-length summary here",
+  "keyPoints": ["point 1", "point 2", "point 3", "... add as many points as needed ..."]
+}
+
+Transcript: "${text}"`
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
